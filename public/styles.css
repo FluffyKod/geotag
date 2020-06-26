@@ -1,0 +1,57 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    min-width: 100vw;
+    overflow: hidden;
+    font-family: 'Poppins', sans-serif;
+}
+
+#map {
+    height: 100vh;
+}
+
+.sweatpoints-container {
+    width: 100vw;
+    height: 50px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* SWAL STYLES */
+.swal2-radio .swal2-label {
+    display: block;
+    flex: 1 1 0px;
+}
+
+.swal2-radio label {
+    height: 100% !important;
+}
+
+.swal2-content .swal2-radio {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: 1fr;
+    grid-row-gap: 30px;
+    padding: 10px;
+}
+
+@media only screen and (max-width: 600px) {
+    .swal2-title {
+        font-size: 1.5rem !important;
+    }
+
+    .swal2-label {
+        font-size: 1rem;
+    }
+}
