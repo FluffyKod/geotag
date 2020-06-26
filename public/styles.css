@@ -11,17 +11,15 @@
 }
 
 body {
-    height: 100vh;
-    width: 100vw;
-    max-height: 100vh;
-    max-width: 100vw;
+    min-height: 100vh;
+    min-width: 100vw;
     overflow: hidden;
     font-family: 'Poppins', sans-serif;
 }
 
 #map {
     height: 100vh;
-    z-index: -1;
+    z-index: 10;
 }
 
 .sweatpoints-container {
@@ -30,7 +28,7 @@ body {
     position: absolute;
     bottom: 0;
     left: 0;
-    /* z-index: 1000; */
+    z-index: 15;
     background: white;
     display: flex;
     align-items: center;
@@ -65,42 +63,39 @@ body {
     }
 }
 
+/*********************
+* INTRO SCREEN
+*********************/
 .cover {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 #overlay {
-    z-index: 50;
+    z-index: 100;
     background: black;
     opacity: 0;
     pointer-events: none;
 }
 
-.intro-screen {
-    z-index: 10;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-image: url('/img/ågestaPIXEL.png');
-    background-position: center;
-    background-size: cover;
-    flex-direction: column;
+#intro-screen {
+  background-image: url('/img/ågestaPIXEL.png');
+  background-position: center;
+  background-size: cover;
+  font-family: 'VT323', monospace;
+  font-weight: bold;
 
-    font-family: 'VT323', monospace;
-    font-weight: bold;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 30;
 }
 
-.intro-screen::after {
+#intro-screen::after {
     content: '';
     position: absolute;
     top: 0;
@@ -111,7 +106,7 @@ body {
     opacity: 0.2;
 }
 
-.intro-screen .logo {
+#intro-screen .logo {
     text-align: center;
     animation: rotate 5s linear infinite;
     transform-origin: center;
@@ -129,7 +124,7 @@ body {
     font-size: 2rem;
 }
 
-.intro-screen .controls {
+#intro-screen .controls {
     display: flex;
     flex-direction: column;
     position: absolute;
