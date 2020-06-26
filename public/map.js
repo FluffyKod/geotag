@@ -73,11 +73,7 @@ class GameController {
         });
   }
   onLocationFound(e) {
-      let radius = e.accuracy / proximity;
-
-      player.setLatLng(e.latlng);
-      playerCircle.setRadius(radius);
-      playerCircle.setLatLng(e.latlng);
+      showPlayer(e)
 
       if (this.activeQuestion) {
           // Check if player is on question1
@@ -192,7 +188,37 @@ class GameController {
 ///////////////////////////
 // MARKER CONTROLLER
 ///////////////////////////
+class MarkerController {
+  constructor() {
+    this.markers = []
+    this.coordinates = []
 
+    // Update label with instructions
+    sweatpointsP.innerHTML = 'Klicka på kartan för att lägga till en koordinat.';
+
+    // Make this reference class, not bobject
+    this.addCoordinate = (e) => {
+      // Add clicked coordinate to array
+      this.coordinates.push(e.latlng)
+
+      // Create a marker and add it to the map
+      let newMarker = L.marker(e.latlng).addTo(map)
+      this.markers.push(newMarker);
+
+      // Make savebutton appear
+      if (!saveBtn.classList.contains('active')) {
+        saveBtn.classList.add('active')
+      }
+    }
+  }
+  onLocationFound(e) {
+      showPlayer(e)
+  }
+  onLocationError(e) {
+      alert(e.message);
+  }
+
+}
 
 ///////////////////////////
 // QUESTION
@@ -224,6 +250,27 @@ class Question {
     }
 }
 
+function initController(controller) {
+  map.on('locationfound', controller.onLocationFound);
+  map.on('locationerror', controller.onLocationError);
+
+  introScreen.style.display = 'none';
+
+  map.locate({
+      setView: true,
+      maxZoom: 18,
+      watch: 'true',
+      enableHighAccuracy: true,
+  });
+}
+
+function showPlayer(e) {
+  let radius = e.accuracy / proximity;
+
+  player.setLatLng(e.latlng);
+  playerCircle.setRadius(radius);
+  playerCircle.setLatLng(e.latlng);
+}
 
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -254,10 +301,13 @@ function fade(callback) {
 // SELECTORS
 ///////////////////////////
 const sweatpointsLabel = document.querySelector('#sweatpoints');
+const sweatpointsP = document.querySelector('.sweatpoints-container p');
 const playBtn = document.querySelector('#play-btn');
 const markerBtn = document.querySelector('#marker-btn');
 const overlay = document.querySelector('#overlay');
 const introScreen = document.querySelector('#intro-screen');
+const center = document.querySelector('#center');
+const saveBtn = document.querySelector('#save-btn');
 
 ///////////////////////////
 // SETUP
@@ -291,20 +341,27 @@ let playerCircle = L.circle(map.getCenter(), 0).addTo(map);
 // EVENT LISTENERS
 ///////////////////////////
 map.on('zoomend', changeLocateMaxZoom);
+// map.on('moveend', function() {
+//   map._locateOptions.setView = false;
+// })
 
 playBtn.addEventListener('click', function() {
   fade(function() {
     game = new GameController();
-    map.on('locationfound', game.onLocationFound);
-    map.on('locationerror', game.onLocationError);
-
-    introScreen.style.display = 'none';
-
-    map.locate({
-        setView: true,
-        maxZoom: 18,
-        watch: 'true',
-        enableHighAccuracy: true,
-    });
+    initController(game)
   });
 })
+
+markerBtn.addEventListener('click', function() {
+  fade(function() {
+    markerController = new MarkerController()
+    initController(markerController)
+
+    map.on('click', markerController.addCoordinate)
+  })
+})
+
+// center.addEventListener('click', function() {
+//   map._locateOptions.setView = true;
+//   map.setView(player.getLatLng())
+// })

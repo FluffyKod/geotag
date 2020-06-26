@@ -63,6 +63,16 @@ body {
     }
 }
 
+#center {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  z-index: 20;
+  background-color: white;
+}
+
 /*********************
 * INTRO SCREEN
 *********************/
@@ -132,7 +142,7 @@ body {
     z-index: 15;
 }
 
-.controls button {
+button {
     width: 70vw;
     height: 60px;
     font-size: 25px;
@@ -166,4 +176,19 @@ body {
     100% {
         transform: rotate(0deg);
     }
+}
+
+#save-btn {
+    z-index: 25;
+    position: absolute;
+    bottom: -20px;
+    right: 0;
+    width: 50%;
+    transition: 1s ease;
+    width: 100%;
+    transform: translateY(100%);
+}
+
+#save-btn.active {
+  transform: translateY(0%);
 }
