@@ -142,7 +142,7 @@ body {
     z-index: 15;
 }
 
-button {
+.block-btn {
     width: 70vw;
     height: 60px;
     font-size: 25px;
@@ -155,6 +155,18 @@ button {
     display: block;
     box-shadow: 0 9px var(--main-dark);
     outline: none;
+}
+
+.remove-btn {
+  border: none;
+  color: #db5c53;
+  background: none;
+  cursor: pointer;
+  margin: 10px 0;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  font: 20px/16px Tahoma, Verdana, sans-serif;
 }
 
 .controls button:active {

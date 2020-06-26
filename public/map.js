@@ -46,7 +46,8 @@ class GameController {
     this.sweatpoints = 0;
     this.questions = []
     this.activeQuestion = null;
-    this.coordinates = this.getCoordinates();
+    this.coordinates = getSavedCoordinates();
+    this.radius = null;
 
     fetch(`https://opentdb.com/api.php?amount=${this.coordinates.length}&type=multiple`)
         .then((res) => res.json())
@@ -67,40 +68,33 @@ class GameController {
 
             this.getRandomQuestion();
 
-            this.addQuestionsToMap();
-
-            // showQuestion(activeQuestion);
+            // this.addQuestionsToMap();
         });
-  }
-  onLocationFound(e) {
-      showPlayer(e)
 
-      if (this.activeQuestion) {
-          // Check if player is on question1
-          let distance = map.distance(
-              player.getLatLng(),
-              this.activeQuestion.marker.getLatLng()
-          );
-
-          if (distance < radius) {
-              playerCircle.setStyle({ fillColor: 'green' });
-              this.showQuestion(this.activeQuestion);
-          }
-      }
+    // THIS reference to game not to event
+    this.onLocationFound = (e) => {
+        this.radius = showPlayer(e)
+        this.playerAtQuestion()
+    }
   }
+
   onLocationError(e) {
       alert(e.message);
   }
-  getCoordinates() {
-    let coordinates = [
-        [59.306222, 18.102063],
-        [59.304843, 18.102574],
-        [59.306877, 18.106906],
-        [59.305608, 18.099358],
-        [59.304148, 18.095912],
-        [59.304259, 18.110573],
-    ];
-    return coordinates;
+  playerAtQuestion() {
+    if (this.activeQuestion && this.radius) {
+
+        // Check if player is on question1
+        let distance = map.distance(
+            player.getLatLng(),
+            this.activeQuestion.marker.getLatLng()
+        );
+
+        if (distance < this.radius) {
+            playerCircle.setStyle({ fillColor: 'green' });
+            this.showQuestion(this.activeQuestion);
+        }
+    }
   }
   addQuestionsToMap() {
       for (let question of this.questions) {
@@ -185,6 +179,18 @@ class GameController {
   }
 }
 
+function getSavedCoordinates() {
+  let savedCoordinates;
+
+  if (localStorage.getItem('coordinates') === null) {
+    savedCoordinates = [];
+  } else {
+    savedCoordinates = JSON.parse(localStorage.getItem('coordinates'))
+  }
+
+  return savedCoordinates;
+}
+
 ///////////////////////////
 // MARKER CONTROLLER
 ///////////////////////////
@@ -192,30 +198,80 @@ class MarkerController {
   constructor() {
     this.markers = []
     this.coordinates = []
+    this.savedCoordinates = getSavedCoordinates()
+    this.addSavedCoordinates();
 
     // Update label with instructions
     sweatpointsP.innerHTML = 'Klicka på kartan för att lägga till en koordinat.';
 
-    // Make this reference class, not bobject
-    this.addCoordinate = (e) => {
-      // Add clicked coordinate to array
-      this.coordinates.push(e.latlng)
-
-      // Create a marker and add it to the map
-      let newMarker = L.marker(e.latlng).addTo(map)
-      this.markers.push(newMarker);
+    // this refers to controller, not object
+    this.onMapClick = (e) => {
+      this.addCoordinate(e.latlng)
 
       // Make savebutton appear
       if (!saveBtn.classList.contains('active')) {
         saveBtn.classList.add('active')
       }
     }
+
   }
   onLocationFound(e) {
       showPlayer(e)
   }
   onLocationError(e) {
       alert(e.message);
+  }
+  addCoordinate(latlng) {
+    // Add clicked coordinate to array
+    this.coordinates.push(latlng)
+
+    // Create a marker and add it to the map
+    let newMarker = L.marker(latlng).addTo(map)
+
+    // newMarker.on('click', this.onMarkerClick)
+    let popupButton = document.createElement('button');
+    popupButton.innerText = 'Remove Marker';
+    popupButton.classList.add('remove-btn');
+    popupButton.addEventListener('click', () => {
+      this.removeMarker(newMarker._leaflet_id);
+    })
+
+    newMarker.bindPopup(popupButton);
+
+    this.markers.push(newMarker);
+  }
+  addSavedCoordinates() {
+    for (let coord of this.savedCoordinates) {
+      this.addCoordinate(coord)
+    }
+  }
+  saveCoordinates(popup = true) {
+    // Save coordinates to local storage
+    localStorage.setItem('coordinates', JSON.stringify(this.coordinates))
+
+    if (popup) {
+      Swal.fire(
+        'Markers Saved!',
+        'Dina markers har blivit sparade. Ladda om sidan och klicka på PLAY för att spela!',
+        'success'
+      )
+    }
+  }
+  removeMarker(markerId) {
+
+    let clickedMarker = this.markers.find(marker => {
+      return marker._leaflet_id == markerId
+    });
+
+    let markerIndex = this.markers.indexOf(clickedMarker)
+
+    // Remove marker from map
+    map.removeLayer(clickedMarker);
+
+    // Remove marker and coordinates
+    this.markers.splice(markerIndex, 1);
+    this.coordinates.splice(markerIndex, 1);
+    this.saveCoordinates(false)
   }
 
 }
@@ -270,6 +326,8 @@ function showPlayer(e) {
   player.setLatLng(e.latlng);
   playerCircle.setRadius(radius);
   playerCircle.setLatLng(e.latlng);
+
+  return radius
 }
 
 function shuffleArray(array) {
@@ -312,7 +370,7 @@ const saveBtn = document.querySelector('#save-btn');
 ///////////////////////////
 // SETUP
 ///////////////////////////
-const proximity = 2;
+const proximity = 0.2;
 
 // Create new map
 var map = L.map('map', {
@@ -346,9 +404,12 @@ map.on('zoomend', changeLocateMaxZoom);
 // })
 
 playBtn.addEventListener('click', function() {
+  game = new GameController();
+
   fade(function() {
-    game = new GameController();
     initController(game)
+    game.addQuestionsToMap()
+    game.playerAtQuestion()
   });
 })
 
@@ -357,8 +418,17 @@ markerBtn.addEventListener('click', function() {
     markerController = new MarkerController()
     initController(markerController)
 
-    map.on('click', markerController.addCoordinate)
+    map.on('click', markerController.onMapClick)
+
+    // Do not center map on player if user moves around
+    map.on('moveend', function() {
+      map._locateOptions.setView = false;
+    })
   })
+})
+
+saveBtn.addEventListener('click', function() {
+  markerController.saveCoordinates()
 })
 
 // center.addEventListener('click', function() {
