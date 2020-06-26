@@ -325,3 +325,5 @@ map.locate({
 map.on('locationfound', onLocationFound);
 map.on('locationerror', onLocationError);
 map.on('zoomend', changeLocateMaxZoom);
+
+// window.navigator.vibrate(200);
