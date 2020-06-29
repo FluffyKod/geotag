@@ -370,7 +370,7 @@ const saveBtn = document.querySelector('#save-btn');
 ///////////////////////////
 // SETUP
 ///////////////////////////
-const proximity = 0.2;
+const proximity = 1.8;
 
 // Create new map
 var map = L.map('map', {
